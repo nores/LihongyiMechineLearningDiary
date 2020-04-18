@@ -19,4 +19,69 @@ Gradient Descent(梯度下降）:即根据导数的性质，是正切，如果�
   根据视频里的代码可以知道使用的是python。python有个非常牛的工具叫做AnaConda(百度百科叫python包管理器)
   Anaconda指的是一个开源的Python发行版本，其包含了conda、Python等180多个科学包及其依赖项
   根居实践：直接下载Anaconda，500M的，不要下载mini，我不会用。
-  下载完成Anaconda之后，进入界面，直接就有jupyterlab，点击启动即可。
+  下载完成Anaconda之后，进入界面，直接就有jupyterlab，点击启动即可，即可进入视频界面。
+  代码说明：由于视频代码不完整，导致走了一些弯路：下面贴上完整代码：
+  数据集：（弹幕上有的人结果的黑线是向右走的，我个人是因为x_data少写了数据）
+  x_data=[338,333,328,207,226,25,179,60,208,606]
+  y_data=[640,633,619,393,428,27,193,66,226,1591]
+  
+  建立x,y,Z轴数据：
+  import numpy as np        #numpy是 Python 语言的一个扩展程序库，支持大量的维度数组与矩阵运算，此外也针对数组运算提供大量的数学函数库。
+ x=np.arange(-200,-100,1)#bias x轴是偏移量
+y=np.arange(-5,5,0.1)#weight  y轴是重量
+Z=np.zeros((len(x),len(y)))   #创建一个矩阵，有x行，y列
+X,Y=np.meshgrid(x,y)           #生成网格点坐标矩阵
+for i in range(len(x)):        #遍历X和y,给Z的每一个点都赋值，每一个值都为根据w和b计算出来的方差
+    for j in range(len(y)):
+        b=x[i]
+        w=y[i]
+        Z[i][j]=0
+        for n in range(len(x_data)):
+            Z[i][j]=Z[i][j]+(y_data[n]-b-w*x_data[n])**2         #这里视频代码出错，写反了
+        Z[i][j]=Z[i][j]/len(x_data)
+        
+  #准备完毕，正式开始
+  from matplotlib import pyplot as plt #导入库
+
+#ydata=b+w*xdata  
+b=-120
+w=-4
+lr=1 #learning rate  步长
+iteration=100000  #迭代次数
+
+#store inital values for plotting
+b_history=[b]           
+w_history=[w]
+
+lr_b=0     #这里视频上讲了，目前不清楚。后续课程会说
+lr_w=0
+
+#iterations
+for i in range(iteration):
+    b_grad=0.0
+    w_grad=0.0
+    for n in range(len(x_data)):
+        b_grad=b_grad-2.0*(y_data[n]-b-w*x_data[n])*1.0       #对b求导
+        w_grad=w_grad-2.0*(y_data[n]-b-w*x_data[n])*x_data[n]# 对w求导
+    lr_b=lr_b+b_grad**2                                       
+    lr_w=lr_w+w_grad**2
+    #update parameters
+    b=b-lr/np.sqrt(lr_b)*b_grad               #更新b和w的值
+    w=w-lr/np.sqrt(lr_w)*w_grad
+    
+    #stroe parameters for plotting
+    b_history.append(b)                  #记录历史b和w的点 
+    w_history.append(w)
+    
+#plot the figure
+plt.contourf(x,y,Z,300,alpha=0.5,cmap=plt.get_cmap('jet'))            #画出等高线，这里的jet是一种颜色映射，具体含义可以查找官网或者百度
+#https://blog.csdn.net/Mr_Cat123/article/details/78638491
+plt.plot([-188.4],[2.67],'x',ms=12,markeredgewidth=3,color='orange') #画出视频中给出的最优解
+plt.plot(b_history,w_history,'o-',ms=3,lw=1.5,color='black')         #画出初始点
+plt.xlim(-200,-100)                                                 #x周，y轴
+plt.ylim(-5,5)
+plt.xlabel(r'$b$',fontsize=16)                                          #x,y的坐标
+plt.ylabel(r'$w$',fontsize=16)
+plt.show()
+  
+  
